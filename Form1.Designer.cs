@@ -190,7 +190,7 @@
             // 
             this.lblDegreeSign.AutoSize = true;
             this.lblDegreeSign.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblDegreeSign.Location = new System.Drawing.Point(86, 28);
+            this.lblDegreeSign.Location = new System.Drawing.Point(86, 30);
             this.lblDegreeSign.Name = "lblDegreeSign";
             this.lblDegreeSign.Size = new System.Drawing.Size(20, 15);
             this.lblDegreeSign.TabIndex = 3;
@@ -370,7 +370,7 @@
             // tempReading
             // 
             this.tempReading.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tempReading.Location = new System.Drawing.Point(112, 23);
+            this.tempReading.Location = new System.Drawing.Point(112, 21);
             this.tempReading.Name = "tempReading";
             this.tempReading.Size = new System.Drawing.Size(40, 13);
             this.tempReading.TabIndex = 7;
