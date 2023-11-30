@@ -13,9 +13,9 @@ namespace Ass04_TampusTicod
 {
 
 
-    public partial class Form1 : Form
+    public partial class fanControl : Form
     {
-        private int speedMode = 0;
+        private int speedId = 0;
 
         #region Local Handlers
         private void updateComportList()
@@ -30,7 +30,7 @@ namespace Ass04_TampusTicod
         }
         #endregion
 
-        public Form1()
+        public fanControl()
         {
             InitializeComponent();
         }
@@ -38,12 +38,13 @@ namespace Ass04_TampusTicod
         {
             if ("Disconnect" == btnSerialConnect.Text)
             {
+
                 if (true == Serial.IsOpen)
                 {
+                    lblRPM.Text = "OFF";
+                    Serial.WriteLine(0.ToString());
                     Serial.Close();
                 }
-
-                changeSpeed_Manual(0); //speed change
 
                 btnSerialConnect.Text = "Connect";
                 lblStatusText.Text = "Disconnected";
@@ -101,7 +102,7 @@ namespace Ass04_TampusTicod
                     cboxComport.Enabled = false;
                     cboxBaudrate.Enabled = false;
 
-                    changeSpeed_Manual(speedMode);
+                    ChangeSpeed(speedId);
 
                     //Add callback handler for receiving
                     //Serial.DataReceived += SerialOnReceivedHandler;
@@ -115,13 +116,11 @@ namespace Ass04_TampusTicod
             if (radioBtn_Manual.Checked)
             {
                 gbxAuto.Enabled = false;
-                changeSpeed_Manual(speedMode);
-                lblRPMCount.Text = rnd.Next(0, 12500).ToString();
+                ChangeSpeed(speedId);
             }
             else
             {
                 gbxAuto.Enabled = true;
-                lblRPMCount.Text = rnd.Next(0, 12500).ToString();
             }
         }
         private void radioBtn_Auto_CheckedChanged(object sender, EventArgs e)
@@ -131,14 +130,10 @@ namespace Ass04_TampusTicod
             if (radioBtn_Auto.Checked)
             {
                 gbxManual.Enabled = false;
-                changeSpeed_Manual(-1);
-                lblRPMCount.Text = rnd.Next(0, 12500).ToString();
             }
             else
             {
                 gbxManual.Enabled = true;
-                btnConfirm.Enabled = false;
-                lblRPMCount.Text = rnd.Next(0, 12500).ToString();
             }
         }
         private void cboxComport_Click(object sender, EventArgs e)
@@ -149,48 +144,107 @@ namespace Ass04_TampusTicod
         {
             if (radioBtn_speedOff.Checked)
             {
-                speedMode = 0;
+                speedId = 0;
             }
             if (radioBtn_speedLow.Checked)
             {
-                speedMode = 1;
+                speedId = 1;
             }
             if (radioBtn_speedMedium.Checked)
             {
-                speedMode = 2;
+                speedId = 2;
             }
             if (radioBtn_speedHigh.Checked)
             {
-                speedMode = 3;
+                speedId = 3;
             }
 
-            changeSpeed_Manual(speedMode);
+            ChangeSpeed(speedId);
         }
 
         //Functions necessary for the speed changing
 
-        private void changeSpeed_Manual(int speed)
+        private void ChangeSpeed(int speed)
         {
-            switch (speed)
+            switch (speedId)
             {
                 case 0:
                     testSpeed.Text = "Speed: Off";
+
+                    if (Serial.IsOpen)
+                    {
+                        lblRPM.Text = "OFF";
+                        Serial.WriteLine(0.ToString());
+                    }
+
                     break;
                 case 1:
                     testSpeed.Text = "Speed: Low";
+
+
+                    if (Serial.IsOpen)
+                    {
+                        lblRPM.Text = RpmDisp(127);
+                        Serial.WriteLine(127.ToString());
+                    }
+
                     break;
                 case 2:
                     testSpeed.Text = "Speed: Medium";
+
+                    if (Serial.IsOpen)
+                    {
+                        lblRPM.Text = RpmDisp(191);
+                        Serial.WriteLine(191.ToString());
+                    }
+
                     break;
                 case 3:
                     testSpeed.Text = "Speed: High";
+
+                    if (null != Serial)
+                    {
+                        if (Serial.IsOpen)
+                        {
+                            lblRPM.Text = RpmDisp(255);
+                            Serial.WriteLine(255.ToString());
+                        }
+                    }
+
                     break;
-                default:
+                case -1:
                     testSpeed.Text = "Speed: Auto";
                     break;
             }
         }
 
+        private string RpmDisp(float pwmSpeed)
+        {
+            int rpm;
+
+            rpm = (int)(2720 * pwmSpeed/255);
+            return rpm.ToString();
+        }
+
+        private void Serial_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
+        {
+            string speedMode = Serial.ReadLine();
+
+            this.Invoke(new Action(() =>
+            {
+                speedId = int.Parse(speedMode);
+            }));
+        }
+
+        private void fanControl_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            if (true == Serial.IsOpen)
+            {
+                lblRPM.Text = "OFF";
+                Serial.WriteLine(0.ToString());
+                Serial.Close();
+            }
+        }
     }
 
 }
