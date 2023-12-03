@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -15,15 +16,20 @@ namespace Ass04_TampusTicod
 
     public partial class fanControl : Form
     {
-        private int speedId = 0;
+        private int[] _tempPoints;
+        private int _speedId = 0;
+        private int _tempId = 0;
+        private int _tempHolder;
+        private double _tempDouble;
+        private int _tickCount;
 
         #region Local Handlers
-        private void updateComportList()
+        private void UpdateComportList()
         {
-            string[] Ports = System.IO.Ports.SerialPort.GetPortNames();
+            string[] ports = System.IO.Ports.SerialPort.GetPortNames();
             cboxComport.Items.Clear();
 
-            foreach (var item in Ports)
+            foreach (var item in ports)
             {
                 cboxComport.Items.Add(item);
             }
@@ -33,6 +39,7 @@ namespace Ass04_TampusTicod
         public fanControl()
         {
             InitializeComponent();
+            InitializePoints();
         }
         private void btnSerialConnect_Click(object sender, EventArgs e)
         {
@@ -42,6 +49,7 @@ namespace Ass04_TampusTicod
                 if (true == Serial.IsOpen)
                 {
                     lblRPM.Text = "OFF";
+                    tempReading.Text = "NaN";
                     Serial.WriteLine(0.ToString());
                     Serial.Close();
                 }
@@ -86,6 +94,7 @@ namespace Ass04_TampusTicod
                 {
                     //COM Port available
                     Serial.Open();
+                    drawTimer.Start();
                 }
                 catch
                 {
@@ -102,7 +111,7 @@ namespace Ass04_TampusTicod
                     cboxComport.Enabled = false;
                     cboxBaudrate.Enabled = false;
 
-                    ChangeSpeed(speedId);
+                    ChangeSpeed(_speedId);
 
                     //Add callback handler for receiving
                     //Serial.DataReceived += SerialOnReceivedHandler;
@@ -111,12 +120,11 @@ namespace Ass04_TampusTicod
         }
         private void radioBtn_Manual_CheckedChanged(object sender, EventArgs e)
         {
-            Random rnd = new Random();
 
             if (radioBtn_Manual.Checked)
             {
                 gbxAuto.Enabled = false;
-                ChangeSpeed(speedId);
+                ChangeSpeed(_speedId);
             }
             else
             {
@@ -125,7 +133,6 @@ namespace Ass04_TampusTicod
         }
         private void radioBtn_Auto_CheckedChanged(object sender, EventArgs e)
         {
-            Random rnd = new Random();
 
             if (radioBtn_Auto.Checked)
             {
@@ -138,35 +145,116 @@ namespace Ass04_TampusTicod
         }
         private void cboxComport_Click(object sender, EventArgs e)
         {
-            updateComportList();
+            UpdateComportList();
         }
         private void radioBtn_speedOff_CheckedChanged(object sender, EventArgs e)
         {
             if (radioBtn_speedOff.Checked)
             {
-                speedId = 0;
+                _speedId = 0;
             }
             if (radioBtn_speedLow.Checked)
             {
-                speedId = 1;
+                _speedId = 1;
             }
             if (radioBtn_speedMedium.Checked)
             {
-                speedId = 2;
+                _speedId = 2;
             }
             if (radioBtn_speedHigh.Checked)
             {
-                speedId = 3;
+                _speedId = 3;
             }
 
-            ChangeSpeed(speedId);
+            ChangeSpeed(_speedId);
         }
+
 
         //Functions necessary for the speed changing
 
+        private void Serial_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
+        {
+            if (Serial.IsOpen)
+            {
+                string stringTemperature = Serial.ReadLine();
+
+                string strTempTrim = stringTemperature.Trim();
+
+                this.BeginInvoke(new EventHandler(((object o, EventArgs a) =>
+                {
+
+                    if (int.TryParse(strTempTrim, out _tempId))
+                    {
+                        if (!(_tempId > 255))
+                        {
+                            _tempHolder = _tempId;
+                            tempReading.Text = Convert_toTemp(_tempId);
+                            transLateToY((int)_tempDouble);
+                        }
+                        else
+                        {
+                            tempReading.Text = "NaN";
+                            transLateToY(0);
+                        }
+                    }
+                    else
+                    {
+                        tempReading.Text = Convert_toTemp(_tempHolder);
+                        transLateToY((int)_tempDouble);
+                    }
+                })));
+            }
+        }
+        private void pbGraph_Paint(object sender, PaintEventArgs e)
+        {
+            Bitmap graphBm = new Bitmap(240, 125);
+            Graphics graph = Graphics.FromImage(graphBm);
+            graph.SmoothingMode = SmoothingMode.AntiAlias;
+
+
+            Brush lineBrush = new SolidBrush(Color.DimGray);
+            Brush pointBrush = new SolidBrush(Color.SlateGray);
+            Brush graphBrush = new SolidBrush(Color.FromArgb(50, Color.SlateGray));
+            Pen graphPen = new Pen(graphBrush, 1);
+            Pen linePen = new Pen(lineBrush, 1);
+            Pen pointPen = new Pen(pointBrush, 3);
+
+            for (int i = 0; i < 9; i++)
+            {
+
+                graph.DrawLine(graphPen, new Point(240 - (27 * i), 0), new Point(240 - (27 * i), 125));
+                graph.DrawLine(linePen, new Point(240 - (27 * i), (125 - _tempPoints[i])), new Point(240 - (27 * (i + 1)), (125 - _tempPoints[i + 1])));
+                graph.DrawEllipse(pointPen, (240 - (27 * i)) - 1, (125 - _tempPoints[i]) - 1, 2, 2);
+            }
+
+            for (int i = 0; i < 4; i++)
+            {
+                graph.DrawLine(graphPen, new Point(0, (125 - (27 * i))), new Point(240, (125 - (27 * i))));
+            }
+
+            pbGraph.Image = graphBm;
+        }
+
+        private void fanControl_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            if (true == Serial.IsOpen)
+            {
+                lblRPM.Text = "OFF";
+                Serial.WriteLine(0.ToString());
+                Serial.Close();
+            }
+        }
+
+        private void drawTimer_Tick(object sender, EventArgs e)
+        {
+            this.Invalidate();
+            _tickCount++;
+            lblTick.Text = _tickCount.ToString(); // for testing
+        }
+
         private void ChangeSpeed(int speed)
         {
-            switch (speedId)
+            switch (_speedId)
             {
                 case 0:
                     testSpeed.Text = "Speed: Off";
@@ -180,7 +268,6 @@ namespace Ass04_TampusTicod
                     break;
                 case 1:
                     testSpeed.Text = "Speed: Low";
-
 
                     if (Serial.IsOpen)
                     {
@@ -222,28 +309,52 @@ namespace Ass04_TampusTicod
         {
             int rpm;
 
-            rpm = (int)(2720 * pwmSpeed/255);
+            rpm = (int)(2720 * pwmSpeed / 255);
             return rpm.ToString();
         }
 
-        private void Serial_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
+        private string Convert_toTemp(int temp_inBin)
         {
-            string speedMode = Serial.ReadLine();
+            _tempDouble = Math.Round(((temp_inBin * 0.0043) * 100.0));
 
-            this.Invoke(new Action(() =>
-            {
-                speedId = int.Parse(speedMode);
-            }));
+            return _tempDouble.ToString();
         }
 
-        private void fanControl_FormClosed(object sender, FormClosedEventArgs e)
+        private void InitializePoints()
         {
-            if (true == Serial.IsOpen)
+            int pointsCount = 10;
+
+            _tempPoints = new Int32[pointsCount];
+
+            /*for (int i = 9; i > 1; i--)
             {
-                lblRPM.Text = "OFF";
-                Serial.WriteLine(0.ToString());
-                Serial.Close();
+                _tempPoints[i] = 0;
+            }*/
+        }
+
+        private void transLateToY(int pointId)
+        {
+            Double tempYCoord = Math.Round((pointId / 110.0) * 120);
+
+            //Point[] temp = tempPoints;
+
+            for (int i = 9; i > 0; i--)
+            {
+                _tempPoints[i] = _tempPoints[i-1];
             }
+
+            _tempPoints[0] = (int)tempYCoord;
+
+            label9.Text = _tempPoints[0].ToString();
+            label10.Text = _tempPoints[1].ToString();
+            label11.Text = _tempPoints[2].ToString();
+            label12.Text = _tempPoints[3].ToString();
+            label13.Text = _tempPoints[4].ToString();
+            label14.Text = _tempPoints[5].ToString();
+            label15.Text = _tempPoints[6].ToString();
+            label16.Text = _tempPoints[7].ToString();
+            label17.Text = _tempPoints[8].ToString();
+            label18.Text = _tempPoints[9].ToString();
         }
     }
 
