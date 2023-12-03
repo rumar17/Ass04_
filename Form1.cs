@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -15,10 +16,12 @@ namespace Ass04_TampusTicod
 
     public partial class fanControl : Form
     {
+        private int[] _tempPoints;
         private int _speedId = 0;
         private int _tempId = 0;
         private int _tempHolder;
-        private double _tempFloat;
+        private double _tempDouble;
+        private int _tickCount;
 
         #region Local Handlers
         private void UpdateComportList()
@@ -36,6 +39,7 @@ namespace Ass04_TampusTicod
         public fanControl()
         {
             InitializeComponent();
+            InitializePoints();
         }
         private void btnSerialConnect_Click(object sender, EventArgs e)
         {
@@ -90,6 +94,7 @@ namespace Ass04_TampusTicod
                 {
                     //COM Port available
                     Serial.Open();
+                    drawTimer.Start();
                 }
                 catch
                 {
@@ -164,7 +169,88 @@ namespace Ass04_TampusTicod
             ChangeSpeed(_speedId);
         }
 
+
         //Functions necessary for the speed changing
+
+        private void Serial_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
+        {
+            if (Serial.IsOpen)
+            {
+                string stringTemperature = Serial.ReadLine();
+
+                string strTempTrim = stringTemperature.Trim();
+
+                this.BeginInvoke(new EventHandler(((object o, EventArgs a) =>
+                {
+
+                    if (int.TryParse(strTempTrim, out _tempId))
+                    {
+                        if (!(_tempId > 255))
+                        {
+                            _tempHolder = _tempId;
+                            tempReading.Text = Convert_toTemp(_tempId);
+                            transLateToY((int)_tempDouble);
+                        }
+                        else
+                        {
+                            tempReading.Text = "NaN";
+                            transLateToY(0);
+                        }
+                    }
+                    else
+                    {
+                        tempReading.Text = Convert_toTemp(_tempHolder);
+                        transLateToY((int)_tempDouble);
+                    }
+                })));
+            }
+        }
+        private void pbGraph_Paint(object sender, PaintEventArgs e)
+        {
+            Bitmap graphBm = new Bitmap(240, 125);
+            Graphics graph = Graphics.FromImage(graphBm);
+            graph.SmoothingMode = SmoothingMode.AntiAlias;
+
+
+            Brush lineBrush = new SolidBrush(Color.DimGray);
+            Brush pointBrush = new SolidBrush(Color.SlateGray);
+            Brush graphBrush = new SolidBrush(Color.FromArgb(50, Color.SlateGray));
+            Pen graphPen = new Pen(graphBrush, 1);
+            Pen linePen = new Pen(lineBrush, 1);
+            Pen pointPen = new Pen(pointBrush, 3);
+
+            for (int i = 0; i < 9; i++)
+            {
+
+                graph.DrawLine(graphPen, new Point(240 - (27 * i), 0), new Point(240 - (27 * i), 125));
+                graph.DrawLine(linePen, new Point(240 - (27 * i), (125 - _tempPoints[i])), new Point(240 - (27 * (i + 1)), (125 - _tempPoints[i + 1])));
+                graph.DrawEllipse(pointPen, (240 - (27 * i)) - 1, (125 - _tempPoints[i]) - 1, 2, 2);
+            }
+
+            for (int i = 0; i < 4; i++)
+            {
+                graph.DrawLine(graphPen, new Point(0, (125 - (27 * i))), new Point(240, (125 - (27 * i))));
+            }
+
+            pbGraph.Image = graphBm;
+        }
+
+        private void fanControl_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            if (true == Serial.IsOpen)
+            {
+                lblRPM.Text = "OFF";
+                Serial.WriteLine(0.ToString());
+                Serial.Close();
+            }
+        }
+
+        private void drawTimer_Tick(object sender, EventArgs e)
+        {
+            this.Invalidate();
+            _tickCount++;
+            lblTick.Text = _tickCount.ToString(); // for testing
+        }
 
         private void ChangeSpeed(int speed)
         {
@@ -182,7 +268,6 @@ namespace Ass04_TampusTicod
                     break;
                 case 1:
                     testSpeed.Text = "Speed: Low";
-
 
                     if (Serial.IsOpen)
                     {
@@ -224,56 +309,52 @@ namespace Ass04_TampusTicod
         {
             int rpm;
 
-            rpm = (int)(2720 * pwmSpeed/255);
+            rpm = (int)(2720 * pwmSpeed / 255);
             return rpm.ToString();
-        }
-
-        private void Serial_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
-        {
-
-            if (Serial.IsOpen)
-            {
-                string stringTemperature = Serial.ReadLine();
-
-                string strTempTrim = stringTemperature.Trim();
-
-                this.BeginInvoke(new EventHandler(((object o, EventArgs a) =>
-                {
-
-                    if (int.TryParse(strTempTrim, out _tempId))
-                    {
-                        _tempHolder = _tempId;
-                        tempReading.Text = Convert_toTemp(_tempId);
-                    }
-                    else
-                    {
-                        tempReading.Text = Convert_toTemp(_tempHolder);
-                    }
-                })));
-            }
-            
-
-        }
-
-        private void fanControl_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            if (true == Serial.IsOpen)
-            {
-                lblRPM.Text = "OFF";
-                Serial.WriteLine(0.ToString());
-                Serial.Close();
-            }
         }
 
         private string Convert_toTemp(int temp_inBin)
         {
-            _tempFloat = ((temp_inBin * 0.0043) * 100.0);
+            _tempDouble = Math.Round(((temp_inBin * 0.0043) * 100.0));
 
-            double tempInDegrees = Math.Round(_tempFloat);
+            return _tempDouble.ToString();
+        }
 
-            testSpeed.Text = _tempFloat.ToString();
+        private void InitializePoints()
+        {
+            int pointsCount = 10;
 
-            return tempInDegrees.ToString();
+            _tempPoints = new Int32[pointsCount];
+
+            /*for (int i = 9; i > 1; i--)
+            {
+                _tempPoints[i] = 0;
+            }*/
+        }
+
+        private void transLateToY(int pointId)
+        {
+            Double tempYCoord = Math.Round((pointId / 110.0) * 120);
+
+            //Point[] temp = tempPoints;
+
+            for (int i = 9; i > 0; i--)
+            {
+                _tempPoints[i] = _tempPoints[i-1];
+            }
+
+            _tempPoints[0] = (int)tempYCoord;
+
+            label9.Text = _tempPoints[0].ToString();
+            label10.Text = _tempPoints[1].ToString();
+            label11.Text = _tempPoints[2].ToString();
+            label12.Text = _tempPoints[3].ToString();
+            label13.Text = _tempPoints[4].ToString();
+            label14.Text = _tempPoints[5].ToString();
+            label15.Text = _tempPoints[6].ToString();
+            label16.Text = _tempPoints[7].ToString();
+            label17.Text = _tempPoints[8].ToString();
+            label18.Text = _tempPoints[9].ToString();
         }
     }
 
