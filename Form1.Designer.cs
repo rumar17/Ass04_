@@ -52,6 +52,8 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.gbxFanControl = new System.Windows.Forms.GroupBox();
             this.gbxTemp = new System.Windows.Forms.GroupBox();
+            this.lblRPM = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
             this.tempReading = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
@@ -60,8 +62,7 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.cboxComport = new System.Windows.Forms.ComboBox();
             this.testSpeed = new System.Windows.Forms.TextBox();
-            this.label6 = new System.Windows.Forms.Label();
-            this.lblRPM = new System.Windows.Forms.Label();
+            this.drawTimer = new System.Windows.Forms.Timer(this.components);
             this.gbxManual.SuspendLayout();
             this.gbxAuto.SuspendLayout();
             this.gbxConfig.SuspendLayout();
@@ -336,14 +337,34 @@
             this.gbxTemp.TabStop = false;
             this.gbxTemp.Text = "Temperature";
             // 
+            // lblRPM
+            // 
+            this.lblRPM.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblRPM.Location = new System.Drawing.Point(104, 41);
+            this.lblRPM.Name = "lblRPM";
+            this.lblRPM.Size = new System.Drawing.Size(40, 13);
+            this.lblRPM.TabIndex = 9;
+            this.lblRPM.Text = "OFF";
+            this.lblRPM.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(70, 41);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(33, 13);
+            this.label6.TabIndex = 8;
+            this.label6.Text = "RPM:";
+            this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
             // tempReading
             // 
             this.tempReading.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tempReading.Location = new System.Drawing.Point(114, 23);
+            this.tempReading.Location = new System.Drawing.Point(109, 23);
             this.tempReading.Name = "tempReading";
-            this.tempReading.Size = new System.Drawing.Size(30, 13);
+            this.tempReading.Size = new System.Drawing.Size(35, 13);
             this.tempReading.TabIndex = 7;
-            this.tempReading.Text = "150";
+            this.tempReading.Text = "NaN";
             this.tempReading.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // label2
@@ -359,7 +380,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(146, 23);
+            this.label1.Location = new System.Drawing.Point(142, 23);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(20, 15);
             this.label1.TabIndex = 4;
@@ -420,25 +441,9 @@
             this.testSpeed.Size = new System.Drawing.Size(96, 20);
             this.testSpeed.TabIndex = 9;
             // 
-            // label6
+            // drawTimer
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(70, 41);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(33, 13);
-            this.label6.TabIndex = 8;
-            this.label6.Text = "RPM:";
-            this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // lblRPM
-            // 
-            this.lblRPM.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblRPM.Location = new System.Drawing.Point(104, 41);
-            this.lblRPM.Name = "lblRPM";
-            this.lblRPM.Size = new System.Drawing.Size(40, 13);
-            this.lblRPM.TabIndex = 9;
-            this.lblRPM.Text = "OFF";
-            this.lblRPM.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.drawTimer.Interval = 1000;
             // 
             // fanControl
             // 
@@ -512,6 +517,7 @@
         private System.Windows.Forms.TextBox testSpeed;
         private System.Windows.Forms.Label lblRPM;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Timer drawTimer;
     }
 }
 

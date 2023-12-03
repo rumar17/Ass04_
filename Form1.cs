@@ -15,15 +15,18 @@ namespace Ass04_TampusTicod
 
     public partial class fanControl : Form
     {
-        private int speedId = 0;
+        private int _speedId = 0;
+        private int _tempId = 0;
+        private int _tempHolder;
+        private double _tempFloat;
 
         #region Local Handlers
-        private void updateComportList()
+        private void UpdateComportList()
         {
-            string[] Ports = System.IO.Ports.SerialPort.GetPortNames();
+            string[] ports = System.IO.Ports.SerialPort.GetPortNames();
             cboxComport.Items.Clear();
 
-            foreach (var item in Ports)
+            foreach (var item in ports)
             {
                 cboxComport.Items.Add(item);
             }
@@ -42,6 +45,7 @@ namespace Ass04_TampusTicod
                 if (true == Serial.IsOpen)
                 {
                     lblRPM.Text = "OFF";
+                    tempReading.Text = "NaN";
                     Serial.WriteLine(0.ToString());
                     Serial.Close();
                 }
@@ -102,7 +106,7 @@ namespace Ass04_TampusTicod
                     cboxComport.Enabled = false;
                     cboxBaudrate.Enabled = false;
 
-                    ChangeSpeed(speedId);
+                    ChangeSpeed(_speedId);
 
                     //Add callback handler for receiving
                     //Serial.DataReceived += SerialOnReceivedHandler;
@@ -111,12 +115,11 @@ namespace Ass04_TampusTicod
         }
         private void radioBtn_Manual_CheckedChanged(object sender, EventArgs e)
         {
-            Random rnd = new Random();
 
             if (radioBtn_Manual.Checked)
             {
                 gbxAuto.Enabled = false;
-                ChangeSpeed(speedId);
+                ChangeSpeed(_speedId);
             }
             else
             {
@@ -125,7 +128,6 @@ namespace Ass04_TampusTicod
         }
         private void radioBtn_Auto_CheckedChanged(object sender, EventArgs e)
         {
-            Random rnd = new Random();
 
             if (radioBtn_Auto.Checked)
             {
@@ -138,35 +140,35 @@ namespace Ass04_TampusTicod
         }
         private void cboxComport_Click(object sender, EventArgs e)
         {
-            updateComportList();
+            UpdateComportList();
         }
         private void radioBtn_speedOff_CheckedChanged(object sender, EventArgs e)
         {
             if (radioBtn_speedOff.Checked)
             {
-                speedId = 0;
+                _speedId = 0;
             }
             if (radioBtn_speedLow.Checked)
             {
-                speedId = 1;
+                _speedId = 1;
             }
             if (radioBtn_speedMedium.Checked)
             {
-                speedId = 2;
+                _speedId = 2;
             }
             if (radioBtn_speedHigh.Checked)
             {
-                speedId = 3;
+                _speedId = 3;
             }
 
-            ChangeSpeed(speedId);
+            ChangeSpeed(_speedId);
         }
 
         //Functions necessary for the speed changing
 
         private void ChangeSpeed(int speed)
         {
-            switch (speedId)
+            switch (_speedId)
             {
                 case 0:
                     testSpeed.Text = "Speed: Off";
@@ -228,12 +230,29 @@ namespace Ass04_TampusTicod
 
         private void Serial_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
         {
-            string speedMode = Serial.ReadLine();
 
-            this.Invoke(new Action(() =>
+            if (Serial.IsOpen)
             {
-                speedId = int.Parse(speedMode);
-            }));
+                string stringTemperature = Serial.ReadLine();
+
+                string strTempTrim = stringTemperature.Trim();
+
+                this.BeginInvoke(new EventHandler(((object o, EventArgs a) =>
+                {
+
+                    if (int.TryParse(strTempTrim, out _tempId))
+                    {
+                        _tempHolder = _tempId;
+                        tempReading.Text = Convert_toTemp(_tempId);
+                    }
+                    else
+                    {
+                        tempReading.Text = Convert_toTemp(_tempHolder);
+                    }
+                })));
+            }
+            
+
         }
 
         private void fanControl_FormClosed(object sender, FormClosedEventArgs e)
@@ -244,6 +263,17 @@ namespace Ass04_TampusTicod
                 Serial.WriteLine(0.ToString());
                 Serial.Close();
             }
+        }
+
+        private string Convert_toTemp(int temp_inBin)
+        {
+            _tempFloat = ((temp_inBin * 0.0043) * 100.0);
+
+            double tempInDegrees = Math.Round(_tempFloat);
+
+            testSpeed.Text = _tempFloat.ToString();
+
+            return tempInDegrees.ToString();
         }
     }
 
