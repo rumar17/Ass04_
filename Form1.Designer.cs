@@ -38,7 +38,6 @@
             this.radioBtn_speedLow = new System.Windows.Forms.RadioButton();
             this.gbxAuto = new System.Windows.Forms.GroupBox();
             this.lblDegreeSign = new System.Windows.Forms.Label();
-            this.btnConfirm = new System.Windows.Forms.Button();
             this.tbxTemp = new System.Windows.Forms.TextBox();
             this.gbxConfig = new System.Windows.Forms.GroupBox();
             this.btnSerialConnect = new System.Windows.Forms.Button();
@@ -66,17 +65,17 @@
             this.cboxComport = new System.Windows.Forms.ComboBox();
             this.testSpeed = new System.Windows.Forms.TextBox();
             this.drawTimer = new System.Windows.Forms.Timer(this.components);
-            this.lblTick = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
-            this.label14 = new System.Windows.Forms.Label();
+            this.intDiff = new System.Windows.Forms.Label();
             this.label15 = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
             this.label18 = new System.Windows.Forms.Label();
+            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.gbxManual.SuspendLayout();
             this.gbxAuto.SuspendLayout();
             this.gbxConfig.SuspendLayout();
@@ -86,6 +85,7 @@
             this.gbxFanControl.SuspendLayout();
             this.gbxTemp.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.SuspendLayout();
             // 
             // Serial
@@ -156,8 +156,8 @@
             // 
             // gbxAuto
             // 
+            this.gbxAuto.Controls.Add(this.numericUpDown1);
             this.gbxAuto.Controls.Add(this.lblDegreeSign);
-            this.gbxAuto.Controls.Add(this.btnConfirm);
             this.gbxAuto.Controls.Add(this.tbxTemp);
             this.gbxAuto.Enabled = false;
             this.gbxAuto.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -179,25 +179,16 @@
             this.lblDegreeSign.TabIndex = 3;
             this.lblDegreeSign.Text = "°C";
             // 
-            // btnConfirm
-            // 
-            this.btnConfirm.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnConfirm.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(26)))), ((int)(((byte)(26)))));
-            this.btnConfirm.Location = new System.Drawing.Point(112, 25);
-            this.btnConfirm.Name = "btnConfirm";
-            this.btnConfirm.Size = new System.Drawing.Size(61, 23);
-            this.btnConfirm.TabIndex = 2;
-            this.btnConfirm.Text = "Confirm";
-            this.btnConfirm.UseVisualStyleBackColor = true;
-            // 
             // tbxTemp
             // 
             this.tbxTemp.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.tbxTemp.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tbxTemp.Location = new System.Drawing.Point(8, 26);
             this.tbxTemp.MaxLength = 10;
             this.tbxTemp.Name = "tbxTemp";
             this.tbxTemp.Size = new System.Drawing.Size(74, 22);
             this.tbxTemp.TabIndex = 0;
+            this.tbxTemp.Text = "25";
             this.tbxTemp.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // gbxConfig
@@ -502,16 +493,6 @@
             this.drawTimer.Interval = 1000;
             this.drawTimer.Tick += new System.EventHandler(this.drawTimer_Tick);
             // 
-            // lblTick
-            // 
-            this.lblTick.AutoSize = true;
-            this.lblTick.Location = new System.Drawing.Point(123, 11);
-            this.lblTick.Name = "lblTick";
-            this.lblTick.Size = new System.Drawing.Size(13, 13);
-            this.lblTick.TabIndex = 3;
-            this.lblTick.Text = "0";
-            this.lblTick.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
             // label9
             // 
             this.label9.AutoSize = true;
@@ -557,14 +538,14 @@
             this.label13.TabIndex = 14;
             this.label13.Text = "99";
             // 
-            // label14
+            // intDiff
             // 
-            this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(236, 456);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(19, 13);
-            this.label14.TabIndex = 15;
-            this.label14.Text = "99";
+            this.intDiff.AutoSize = true;
+            this.intDiff.Location = new System.Drawing.Point(121, 9);
+            this.intDiff.Name = "intDiff";
+            this.intDiff.Size = new System.Drawing.Size(19, 13);
+            this.intDiff.TabIndex = 15;
+            this.intDiff.Text = "99";
             // 
             // label15
             // 
@@ -602,29 +583,52 @@
             this.label18.TabIndex = 19;
             this.label18.Text = "99";
             // 
+            // numericUpDown1
+            // 
+            this.numericUpDown1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.numericUpDown1.Location = new System.Drawing.Point(113, 26);
+            this.numericUpDown1.Maximum = new decimal(new int[] {
+            30,
+            0,
+            0,
+            0});
+            this.numericUpDown1.Minimum = new decimal(new int[] {
+            16,
+            0,
+            0,
+            0});
+            this.numericUpDown1.Name = "numericUpDown1";
+            this.numericUpDown1.Size = new System.Drawing.Size(50, 22);
+            this.numericUpDown1.TabIndex = 4;
+            this.numericUpDown1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.numericUpDown1.Value = new decimal(new int[] {
+            25,
+            0,
+            0,
+            0});
+            // 
             // fanControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(324, 500);
+            this.Controls.Add(this.gbxFanControl);
             this.Controls.Add(this.label18);
             this.Controls.Add(this.label17);
             this.Controls.Add(this.label16);
             this.Controls.Add(this.label15);
-            this.Controls.Add(this.label14);
+            this.Controls.Add(this.intDiff);
             this.Controls.Add(this.label13);
             this.Controls.Add(this.label12);
             this.Controls.Add(this.label11);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.label9);
-            this.Controls.Add(this.lblTick);
             this.Controls.Add(this.lblStts);
             this.Controls.Add(this.lblStatusText);
             this.Controls.Add(this.gbxConfig);
             this.Controls.Add(this.testSpeed);
             this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.gbxFanControl);
             this.Controls.Add(this.gbxGraph);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -647,6 +651,7 @@
             this.gbxTemp.ResumeLayout(false);
             this.gbxTemp.PerformLayout();
             this.groupBox1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -667,7 +672,6 @@
         private System.Windows.Forms.RadioButton radioBtn_speedLow;
         private System.Windows.Forms.GroupBox gbxGraph;
         private System.Windows.Forms.GroupBox gbxFanControl;
-        private System.Windows.Forms.Button btnConfirm;
         private System.Windows.Forms.Label lblDegreeSign;
         private System.Windows.Forms.GroupBox gbxTemp;
         private System.Windows.Forms.Label label1;
@@ -686,7 +690,6 @@
         private System.Windows.Forms.Label lblRPM;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Timer drawTimer;
-        private System.Windows.Forms.Label lblTick;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label8;
@@ -696,11 +699,12 @@
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Label label13;
-        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.Label intDiff;
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.NumericUpDown numericUpDown1;
     }
 }
 
