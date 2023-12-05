@@ -26,11 +26,20 @@ namespace Ass04_TampusTicod
         }
         #endregion
 
+        //Initializes the Application
         public fanControl()
         {
             InitializeComponent();
             InitializePoints();
         }
+
+        //Updates COM Ports once click event is triggered
+        private void cboxComport_Click(object sender, EventArgs e)
+        {
+            UpdateComportList();
+        }
+
+        //Attempts to connect to serial once clicked
         private void btnSerialConnect_Click(object sender, EventArgs e)
         {
             if ("Disconnect" == btnSerialConnect.Text)
@@ -62,7 +71,7 @@ namespace Ass04_TampusTicod
             }
             catch
             {
-                MessageBox.Show("No COM Port Selected.");
+                MessageBox.Show("COM Port must not be empty.", "No COM Port Selected");
                 return;
             }
 
@@ -73,7 +82,7 @@ namespace Ass04_TampusTicod
             }
             catch
             {
-                MessageBox.Show("No Baudrate Selected.");
+                MessageBox.Show("Baud Rate must not be empty.", "No Baudrate selected");
                 return;
             }
 
@@ -81,8 +90,7 @@ namespace Ass04_TampusTicod
             if (false == Serial.IsOpen)
             {
                 try
-                {
-                    //COM Port available
+                {   //COM Port available
 
                     Serial.Open();
                 }
@@ -105,6 +113,8 @@ namespace Ass04_TampusTicod
                 }
             }
         }
+
+        //Checks Manual fan mode state
         private void radioBtn_Manual_CheckedChanged(object sender, EventArgs e)
         {
             if (radioBtn_Manual.Checked)
@@ -122,6 +132,8 @@ namespace Ass04_TampusTicod
                 FanControl(_isManual);
             }
         }
+
+        //Checks Automatic fan mode state
         private void radioBtn_Auto_CheckedChanged(object sender, EventArgs e)
         {
             if (radioBtn_Auto.Checked)
@@ -139,11 +151,8 @@ namespace Ass04_TampusTicod
                 FanControl(_isManual);
             }
         }
-        private void cboxComport_Click(object sender, EventArgs e)
-        {
-            UpdateComportList();
-        }
 
+        //Receives data from serial device
         private void Serial_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
         {
             if (Serial.IsOpen)
@@ -180,44 +189,13 @@ namespace Ass04_TampusTicod
             }
         }
 
+        //Triggers specified events once time specified is elapsed
         private void drawTimer_Tick(object sender, EventArgs e)
         {
-            Invalidate();
+            pbGraph.Invalidate();
         }
 
-        //Functions necessary for the speed changing
-
-        private void pbGraph_Paint(object sender, PaintEventArgs e)
-        {
-            Bitmap graphBm = new Bitmap(240, 125);
-            Graphics graph = Graphics.FromImage(graphBm);
-            graph.SmoothingMode = SmoothingMode.AntiAlias;
-
-            Brush lineBrush = new SolidBrush(Color.DimGray);
-            Brush pointBrush = new SolidBrush(Color.SlateGray);
-            Brush graphBrush = new SolidBrush(Color.FromArgb(50, Color.SlateGray));
-            Pen graphPen = new Pen(graphBrush, 1);
-            Pen linePen = new Pen(lineBrush, 1);
-            Pen pointPen = new Pen(pointBrush, 3);
-
-            for (int i = 0; i < 9; i++)
-            {
-
-                graph.DrawLine(graphPen, new Point(240 - (27 * i), 0), new Point(240 - (27 * i), 125));
-                graph.DrawLine(linePen, new Point(240 - (27 * i), (125 - _tempPoints[i])), new Point(240 - (27 * (i + 1)), (125 - _tempPoints[i + 1])));
-                graph.DrawEllipse(pointPen, (240 - (27 * i)) - 1, (125 - _tempPoints[i]) - 1, 2, 2);
-            }
-
-            for (int i = 0; i < 4; i++)
-            {
-                graph.DrawLine(graphPen, new Point(0, (125 - (27 * i))), new Point(240, (125 - (27 * i))));
-            }
-
-            pbGraph.Image = graphBm;
-
-            graph.Dispose();
-        }
-
+        //Closes serial connections once form is closed
         private void fanControl_FormClosed(object sender, FormClosedEventArgs e)
         {
             if (true == Serial.IsOpen)
@@ -227,6 +205,51 @@ namespace Ass04_TampusTicod
             }
         }
 
+        //Triggers when the value of the numericUpDown changes
+        private void tempControl_ValueChanged(object sender, EventArgs e)
+        {
+            FanControl(_isManual);
+        }
+
+        //Functions necessary for the speed changing
+
+        //Draws the graph
+        private void pbGraph_Paint(object sender, PaintEventArgs e)
+        {
+            if (Serial.IsOpen)
+            {
+                Bitmap graphBm = new Bitmap(240, 125);
+                Graphics graph = Graphics.FromImage(graphBm);
+                graph.SmoothingMode = SmoothingMode.AntiAlias;
+
+                Brush lineBrush = new SolidBrush(Color.DimGray);
+                Brush pointBrush = new SolidBrush(Color.SlateGray);
+                Brush graphBrush = new SolidBrush(Color.FromArgb(50, Color.SlateGray));
+
+                Pen graphPen = new Pen(graphBrush, 1);
+                Pen linePen = new Pen(lineBrush, 1);
+                Pen pointPen = new Pen(pointBrush, 3);
+
+                for (int i = 0; i < 9; i++)
+                {
+
+                    graph.DrawLine(graphPen, new Point(240 - (27 * i), 0), new Point(240 - (27 * i), 125));
+                    graph.DrawLine(linePen, new Point(240 - (27 * i), (125 - _tempPoints[i])), new Point(240 - (27 * (i + 1)), (125 - _tempPoints[i + 1])));
+                    graph.DrawEllipse(pointPen, (240 - (27 * i)) - 1, (125 - _tempPoints[i]) - 1, 2, 2);
+                }
+
+                for (int i = 0; i < 4; i++)
+                {
+                    graph.DrawLine(graphPen, new Point(0, (125 - (27 * i))), new Point(240, (125 - (27 * i))));
+                }
+
+                pbGraph.Image = graphBm;
+
+                graph.Dispose();
+            }
+        }
+
+        //Displays current motor RPM
         private string RpmDisp(int pwmSpeed)
         {
             int rpm;
@@ -236,11 +259,13 @@ namespace Ass04_TampusTicod
             return rpm.ToString();
         }
 
+        //Converts temperature from binary to its equivalent integer value
         private string Convert_toTemp(int temp_inBin)
         {
             return Math.Round(((temp_inBin * 0.0043) * 100.0)).ToString();
         }
 
+        //Initializes Y axis of temperature points in the graph
         private void InitializePoints()
         {
             int pointsCount = 10;
@@ -248,6 +273,7 @@ namespace Ass04_TampusTicod
             _tempPoints = new Int32[pointsCount];
         }
 
+        //Translates the binary value of the temperature into the Y axis of the temperature points in the graph
         private void transLateToY(int pointId)
         {
             Double tempYCoord = Math.Round((pointId / 110.0) * 120);
@@ -260,6 +286,7 @@ namespace Ass04_TampusTicod
             _tempPoints[0] = (int)tempYCoord;
         }
 
+        //Adjusts fan speed
         private void FanControl(bool fanControlMode)
         {
             if (_isManual)
@@ -329,11 +356,6 @@ namespace Ass04_TampusTicod
                     lblRPM.Text = RpmDisp(_fanSpeed);
                 }
             }
-        }
-
-        private void tempControl_ValueChanged(object sender, EventArgs e)
-        {
-            FanControl(_isManual);
         }
     }
 }

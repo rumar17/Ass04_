@@ -160,18 +160,18 @@
             // 
             this.label14.AutoSize = true;
             this.label14.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label14.Location = new System.Drawing.Point(3, 25);
+            this.label14.Location = new System.Drawing.Point(22, 25);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(111, 15);
+            this.label14.Size = new System.Drawing.Size(76, 15);
             this.label14.TabIndex = 5;
-            this.label14.Text = "Target Temperature:";
+            this.label14.Text = "Temperature:";
             // 
             // tempControl
             // 
             this.tempControl.AutoSize = true;
             this.tempControl.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.tempControl.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tempControl.Location = new System.Drawing.Point(116, 25);
+            this.tempControl.Location = new System.Drawing.Point(101, 25);
             this.tempControl.Maximum = new decimal(new int[] {
             30,
             0,
@@ -198,7 +198,7 @@
             // 
             this.lblDegreeSign.AutoSize = true;
             this.lblDegreeSign.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblDegreeSign.Location = new System.Drawing.Point(154, 26);
+            this.lblDegreeSign.Location = new System.Drawing.Point(139, 26);
             this.lblDegreeSign.Name = "lblDegreeSign";
             this.lblDegreeSign.Size = new System.Drawing.Size(20, 15);
             this.lblDegreeSign.TabIndex = 3;
