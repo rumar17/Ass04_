@@ -1,27 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Ass04_TampusTicod
 {
-
-
     public partial class fanControl : Form
     {
-        private int[] _tempPoints;  //vertical points of the Graph
-        private int _speedId = 0;   //changes speed mode
-        private int _tempId = 0;    //Binary value of temperature from LM35
-        private int _tempHolder;    //temporary temperature ID storage
-        private double _tempDouble; //temperature value in double
-        int speedReturn;
+        private int[] _tempPoints;      //vertical points of the Graph
+        private int _tempId = 0;        //Binary value of temperature from LM35
+        private int _tempHolder;        //temporary temperature ID storage
+        private int _fanSpeed = 0;      //PWM value of the fan speed
+        private bool _isManual = true;  //Checks if fan is in manual mode
 
         #region Local Handlers
         private void UpdateComportList()
@@ -45,12 +35,12 @@ namespace Ass04_TampusTicod
         {
             if ("Disconnect" == btnSerialConnect.Text)
             {
-
                 if (true == Serial.IsOpen)
                 {
-                    lblRPM.Text = "OFF";
                     tempReading.Text = "NaN";
                     Serial.WriteLine(0.ToString());
+
+                    drawTimer.Stop();
                     Serial.Close();
                 }
 
@@ -93,8 +83,8 @@ namespace Ass04_TampusTicod
                 try
                 {
                     //COM Port available
+
                     Serial.Open();
-                    drawTimer.Start();
                 }
                 catch
                 {
@@ -104,117 +94,104 @@ namespace Ass04_TampusTicod
 
                 if (Serial.IsOpen)
                 {
+                    drawTimer.Start();
+
                     btnSerialConnect.Text = "Disconnect";
                     lblStatusText.Text = "Connected, via " + cboxComport.Text;
                     lblStatusText.ForeColor = Color.MediumSeaGreen;
                     gbxFanControl.Enabled = true; //enables fan control
                     cboxComport.Enabled = false;
                     cboxBaudrate.Enabled = false;
-
-                    ChangeSpeed(_speedId);
-
-                    //Add callback handler for receiving
-                    //Serial.DataReceived += SerialOnReceivedHandler;
                 }
             }
         }
         private void radioBtn_Manual_CheckedChanged(object sender, EventArgs e)
         {
-
             if (radioBtn_Manual.Checked)
             {
-                radioBtn_speedOff.Checked = true;
                 gbxAuto.Enabled = false;
-                ChangeSpeed(_speedId);
+                _isManual = true;
+
+                FanControl(_isManual);
             }
             else
             {
                 gbxAuto.Enabled = true;
-                ChangeSpeed(-1);
+                _isManual = false;
+
+                FanControl(_isManual);
             }
         }
         private void radioBtn_Auto_CheckedChanged(object sender, EventArgs e)
         {
-
             if (radioBtn_Auto.Checked)
             {
                 gbxManual.Enabled = false;
-                ChangeSpeed(-1);
+                _isManual = false;
+
+                FanControl(_isManual);
             }
             else
             {
                 gbxManual.Enabled = true;
-                radioBtn_speedOff.Checked = true;
+                _isManual = true;
+
+                FanControl(_isManual);
             }
         }
         private void cboxComport_Click(object sender, EventArgs e)
         {
             UpdateComportList();
         }
-        private void radioBtn_speedOff_CheckedChanged(object sender, EventArgs e)
-        {
-            if (radioBtn_speedOff.Checked)
-            {
-                _speedId = 0;
-            }
-            if (radioBtn_speedLow.Checked)
-            {
-                _speedId = 1;
-            }
-            if (radioBtn_speedMedium.Checked)
-            {
-                _speedId = 2;
-            }
-            if (radioBtn_speedHigh.Checked)
-            {
-                _speedId = 3;
-            }
-
-            ChangeSpeed(_speedId);
-        }
-
-
-        //Functions necessary for the speed changing
 
         private void Serial_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
         {
             if (Serial.IsOpen)
             {
                 string stringTemperature = Serial.ReadLine();
-
                 string strTempTrim = stringTemperature.Trim();
 
                 this.BeginInvoke(new EventHandler(((object o, EventArgs a) =>
                 {
-
                     if (int.TryParse(strTempTrim, out _tempId))
                     {
                         if (!(_tempId > 255))
                         {
                             _tempHolder = _tempId;
                             tempReading.Text = Convert_toTemp(_tempId);
-                            transLateToY((int)_tempDouble);
+
+                            FanControl(_isManual);
+                            transLateToY(int.Parse(tempReading.Text));
                         }
                         else
                         {
                             tempReading.Text = "NaN";
+
+                            FanControl(_isManual);
                             transLateToY(0);
                         }
                     }
                     else
                     {
                         tempReading.Text = Convert_toTemp(_tempHolder);
-                        transLateToY((int)_tempDouble);
+                        transLateToY(int.Parse(tempReading.Text));
                     }
                 })));
             }
         }
+
+        private void drawTimer_Tick(object sender, EventArgs e)
+        {
+            Invalidate();
+        }
+
+        //Functions necessary for the speed changing
+
         private void pbGraph_Paint(object sender, PaintEventArgs e)
         {
             Bitmap graphBm = new Bitmap(240, 125);
             Graphics graph = Graphics.FromImage(graphBm);
             graph.SmoothingMode = SmoothingMode.AntiAlias;
-
 
             Brush lineBrush = new SolidBrush(Color.DimGray);
             Brush pointBrush = new SolidBrush(Color.SlateGray);
@@ -237,89 +214,31 @@ namespace Ass04_TampusTicod
             }
 
             pbGraph.Image = graphBm;
+
+            graph.Dispose();
         }
 
         private void fanControl_FormClosed(object sender, FormClosedEventArgs e)
         {
             if (true == Serial.IsOpen)
             {
-                lblRPM.Text = "OFF";
                 Serial.WriteLine(0.ToString());
                 Serial.Close();
             }
         }
 
-        private void drawTimer_Tick(object sender, EventArgs e)
-        {
-            if (radioBtn_Auto.Checked)
-            {
-                AutoSpeed(int.Parse(tbxTemp.Text));
-            }
-
-            this.Invalidate();
-        }
-
-        private void ChangeSpeed(int speed)
-        {
-            switch (_speedId)
-            {
-                case 0:
-
-                    if (Serial.IsOpen)
-                    {
-                        lblRPM.Text = "OFF";
-                        Serial.WriteLine(0.ToString());
-                    }
-
-                    break;
-                case 1:
-
-                    if (Serial.IsOpen)
-                    {
-                        RpmDisp(102);
-                        Serial.WriteLine(102.ToString());
-                    }
-
-                    break;
-                case 2:
-
-                    if (Serial.IsOpen)
-                    {
-                        RpmDisp(179);
-                        Serial.WriteLine(179.ToString());
-                    }
-
-                    break;
-                case 3:
-                    if (null != Serial)
-                    {
-                        if (Serial.IsOpen)
-                        {
-                            RpmDisp(255);
-                            Serial.WriteLine(255.ToString());
-                        }
-                    }
-
-                    break;
-                case -1:
-                    AutoSpeed((int)_tempDouble);
-                    break;
-            }
-        }
-
-        private void RpmDisp(float pwmSpeed)
+        private string RpmDisp(int pwmSpeed)
         {
             int rpm;
 
-            rpm = (int)(2720 * pwmSpeed / 255);
-            lblRPM.Text = rpm.ToString();
+            rpm = (int)Math.Round(3200 * (pwmSpeed / 255.0));
+
+            return rpm.ToString();
         }
 
         private string Convert_toTemp(int temp_inBin)
         {
-            _tempDouble = Math.Round(((temp_inBin * 0.0043) * 100.0));
-
-            return _tempDouble.ToString();
+            return Math.Round(((temp_inBin * 0.0043) * 100.0)).ToString();
         }
 
         private void InitializePoints()
@@ -327,14 +246,11 @@ namespace Ass04_TampusTicod
             int pointsCount = 10;
 
             _tempPoints = new Int32[pointsCount];
-
         }
 
         private void transLateToY(int pointId)
         {
             Double tempYCoord = Math.Round((pointId / 110.0) * 120);
-
-            //Point[] temp = tempPoints;
 
             for (int i = 9; i > 0; i--)
             {
@@ -342,45 +258,82 @@ namespace Ass04_TampusTicod
             }
 
             _tempPoints[0] = (int)tempYCoord;
-
-            /*label9.Text = _tempPoints[0].ToString();
-            label10.Text = _tempPoints[1].ToString();
-            label11.Text = _tempPoints[2].ToString();
-            label12.Text = _tempPoints[3].ToString();
-            label13.Text = _tempPoints[4].ToString();
-            label14.Text = _tempPoints[5].ToString();
-            label15.Text = _tempPoints[6].ToString();
-            label16.Text = _tempPoints[7].ToString();
-            label17.Text = _tempPoints[8].ToString();
-            label18.Text = _tempPoints[9].ToString();*/
         }
 
-        //AUTOSPEED - TO BE FINISHED NEXT; add numericUpDown component, modify contents (pushed)
-
-        private void AutoSpeed(int temp)
+        private void FanControl(bool fanControlMode)
         {
-            int intDifferential = int.Parse(tempReading.Text) - temp;
-            
-            intDiff.Text = intDifferential.ToString();
+            if (_isManual)
+            {   //Manual Fan Control Mode
 
-            if (intDifferential > 5)
-            {
-                speedReturn = 255;
-            }
-            else if (intDifferential <= 5 && intDifferential >=0)
-            {
-                speedReturn = (int)((intDifferential / 5.0) * 255);
+                if (radioBtn_speedOff.Checked)
+                {
+                    _fanSpeed = 0;
+                }
+                else if (radioBtn_speedLow.Checked)
+                {
+                    _fanSpeed = 102;
+                }
+                else if (radioBtn_speedMedium.Checked)
+                {
+                    _fanSpeed = 179;
+                }
+                else if (radioBtn_speedHigh.Checked)
+                {
+                    _fanSpeed = 255;
+                }
+                else
+                {
+                    _fanSpeed = 0;
+                }
+
+                if (Serial.IsOpen)
+                {
+                    testSpeed.Text = _fanSpeed.ToString();
+                    Serial.WriteLine(_fanSpeed.ToString());
+
+                    lblRPM.Text = RpmDisp(_fanSpeed);
+                }
             }
             else
-            {
-                speedReturn = 0;
+            {   //Automatic Fan Control Mode
+
+                double tempDifference = ((_tempId * 0.0043) * 100.0) - (double)tempControl.Value;
+
+                intDiff.Text = tempDifference.ToString();
+
+                if (tempDifference >= 5.0)  
+                {
+                    //triggers if temperature differential is above 5 degrees
+
+                    _fanSpeed = 255;
+                }
+                else if (tempDifference < 5.0 && tempDifference > 0)
+                {
+                    //triggers if temperature differential is between 0 and 5 degrees
+
+                    double speedDouble = Math.Round((tempDifference / 5.0) * 255);
+                    _fanSpeed = (int)speedDouble;
+                }
+                else                        
+                {
+                    //triggers when temperature differential is 0;
+
+                    _fanSpeed = 0;
+                }
+
+                testSpeed.Text = _fanSpeed.ToString(); //to be removed
+
+                if (Serial.IsOpen)
+                {
+                    Serial.WriteLine(_fanSpeed.ToString());
+                    lblRPM.Text = RpmDisp(_fanSpeed);
+                }
             }
-
-            testSpeed.Text = speedReturn.ToString();
-
-            Serial.Write(speedReturn.ToString());
         }
 
+        private void tempControl_ValueChanged(object sender, EventArgs e)
+        {
+            FanControl(_isManual);
+        }
     }
-
 }
