@@ -67,6 +67,7 @@
             this.testSpeed = new System.Windows.Forms.TextBox();
             this.intDiff = new System.Windows.Forms.Label();
             this.drawTimer = new System.Windows.Forms.Timer(this.components);
+            this.label9 = new System.Windows.Forms.Label();
             this.gbxManual.SuspendLayout();
             this.gbxAuto.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tempControl)).BeginInit();
@@ -283,6 +284,7 @@
             // 
             // gbxGraph
             // 
+            this.gbxGraph.Controls.Add(this.label9);
             this.gbxGraph.Controls.Add(this.label5);
             this.gbxGraph.Controls.Add(this.label4);
             this.gbxGraph.Controls.Add(this.label8);
@@ -325,7 +327,7 @@
             // 
             this.label8.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(14, 47);
+            this.label8.Location = new System.Drawing.Point(14, 57);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(33, 13);
             this.label8.TabIndex = 7;
@@ -336,7 +338,7 @@
             // 
             this.label7.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(14, 77);
+            this.label7.Location = new System.Drawing.Point(14, 83);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(33, 13);
             this.label7.TabIndex = 6;
@@ -347,7 +349,7 @@
             // 
             this.label3.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(14, 107);
+            this.label3.Location = new System.Drawing.Point(14, 110);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(33, 13);
             this.label3.TabIndex = 5;
@@ -514,6 +516,17 @@
             this.drawTimer.Interval = 200;
             this.drawTimer.Tick += new System.EventHandler(this.drawTimer_Tick);
             // 
+            // label9
+            // 
+            this.label9.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(8, 31);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(39, 13);
+            this.label9.TabIndex = 8;
+            this.label9.Text = "100 °C";
+            this.label9.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
             // fanControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -594,6 +607,7 @@
         private System.Windows.Forms.NumericUpDown tempControl;
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.Timer drawTimer;
+        private System.Windows.Forms.Label label9;
     }
 }
 
