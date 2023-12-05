@@ -216,37 +216,6 @@ namespace Ass04_TampusTicod
         //Draws the graph
         private void pbGraph_Paint(object sender, PaintEventArgs e)
         {
-<<<<<<< HEAD
-            if (Serial.IsOpen)
-            {
-                Bitmap graphBm = new Bitmap(240, 125);
-                Graphics graph = Graphics.FromImage(graphBm);
-                graph.SmoothingMode = SmoothingMode.AntiAlias;
-
-                Brush lineBrush = new SolidBrush(Color.DimGray);
-                Brush pointBrush = new SolidBrush(Color.SlateGray);
-                Brush graphBrush = new SolidBrush(Color.FromArgb(50, Color.SlateGray));
-
-                Pen graphPen = new Pen(graphBrush, 1);
-                Pen linePen = new Pen(lineBrush, 1);
-                Pen pointPen = new Pen(pointBrush, 3);
-
-                for (int i = 0; i < 9; i++)
-                {
-
-                    graph.DrawLine(graphPen, new Point(240 - (27 * i), 0), new Point(240 - (27 * i), 125));
-                    graph.DrawLine(linePen, new Point(240 - (27 * i), (125 - _tempPoints[i])), new Point(240 - (27 * (i + 1)), (125 - _tempPoints[i + 1])));
-                    graph.DrawEllipse(pointPen, (240 - (27 * i)) - 1, (125 - _tempPoints[i]) - 1, 2, 2);
-                }
-
-                for (int i = 0; i < 5; i++)
-                {
-                    graph.DrawLine(graphPen, new Point(0, (125 - (27 * i))), new Point(240, (125 - (27 * i))));
-                }
-
-                pbGraph.Image = graphBm;
-
-=======
             Bitmap graphBm = new Bitmap(240, 125);
             Graphics graph = Graphics.FromImage(graphBm);
             graph.SmoothingMode = SmoothingMode.AntiAlias;
@@ -274,7 +243,6 @@ namespace Ass04_TampusTicod
                 }
 
                 pbGraph.Image = graphBm;
->>>>>>> Amending For final checking and revision
                 graph.Dispose();
             }
         }
