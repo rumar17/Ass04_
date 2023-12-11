@@ -91,7 +91,7 @@ namespace Ass04_TampusTicod
             {
                 try
                 {   //COM Port available
-
+                    
                     Serial.Open();
                 }
                 catch
@@ -102,6 +102,8 @@ namespace Ass04_TampusTicod
 
                 if (Serial.IsOpen)
                 {
+                    Serial.DtrEnable = true;
+
                     drawTimer.Start();
 
                     btnSerialConnect.Text = "Disconnect";
@@ -121,6 +123,7 @@ namespace Ass04_TampusTicod
             {
                 gbxAuto.Enabled = false;
                 _isManual = true;
+                minPWM.Enabled = label10.Enabled = lblMinPWM.Enabled = false;
 
                 FanControl(_isManual);
             }
@@ -128,6 +131,7 @@ namespace Ass04_TampusTicod
             {
                 gbxAuto.Enabled = true;
                 _isManual = false;
+                minPWM.Enabled = label10.Enabled = lblMinPWM.Enabled = true;
 
                 FanControl(_isManual);
             }
@@ -140,6 +144,7 @@ namespace Ass04_TampusTicod
             {
                 gbxManual.Enabled = false;
                 _isManual = false;
+                minPWM.Enabled = label10.Enabled = lblMinPWM.Enabled = true;
 
                 FanControl(_isManual);
             }
@@ -147,6 +152,7 @@ namespace Ass04_TampusTicod
             {
                 gbxManual.Enabled = true;
                 _isManual = true;
+                minPWM.Enabled = label10.Enabled = lblMinPWM.Enabled = false;
 
                 FanControl(_isManual);
             }
@@ -171,6 +177,8 @@ namespace Ass04_TampusTicod
 
                             FanControl(_isManual);
                             transLateToY(int.Parse(tempReading.Text));
+
+                            pbGraph.Refresh();
                         }
                         else
                         {
@@ -192,23 +200,35 @@ namespace Ass04_TampusTicod
         //Triggers specified events once time specified is elapsed
         private void drawTimer_Tick(object sender, EventArgs e)
         {
-            pbGraph.Invalidate();
+            pbGraph.Refresh();
         }
 
         //Closes serial connections once form is closed
         private void fanControl_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (true == Serial.IsOpen)
-            {
-                Serial.WriteLine(0.ToString());
-                Serial.Close();
-            }
+
         }
 
         //Triggers when the value of the numericUpDown changes
         private void tempControl_ValueChanged(object sender, EventArgs e)
         {
             FanControl(_isManual);
+        }
+
+        //Passes the minimum PWM value of the fan once the slider value is changed
+        private void minPWM_ValueChanged(object sender, EventArgs e)
+        {
+            lblMinPWM.Text = minPWM.Value.ToString();
+        }
+
+        //Closes serial once form is closed
+        private void fanControl_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (true == Serial.IsOpen)
+            {
+                Serial.WriteLine(0.ToString());
+                Serial.Close();
+            }
         }
 
         //Functions necessary for the speed changing
@@ -245,16 +265,6 @@ namespace Ass04_TampusTicod
                 pbGraph.Image = graphBm;
                 graph.Dispose();
             }
-        }
-
-        //Displays current motor RPM
-        private string RpmDisp(int pwmSpeed)
-        {
-            int rpm;
-
-            rpm = (int)Math.Round(3200 * (pwmSpeed / 255.0));
-
-            return rpm.ToString();
         }
 
         //Converts temperature from binary to its equivalent integer value
@@ -296,11 +306,11 @@ namespace Ass04_TampusTicod
                 }
                 else if (radioBtn_speedLow.Checked)
                 {
-                    _fanSpeed = 102;
+                    _fanSpeed = 130;
                 }
                 else if (radioBtn_speedMedium.Checked)
                 {
-                    _fanSpeed = 179;
+                    _fanSpeed = 204;
                 }
                 else if (radioBtn_speedHigh.Checked)
                 {
@@ -313,18 +323,15 @@ namespace Ass04_TampusTicod
 
                 if (Serial.IsOpen)
                 {
-                    testSpeed.Text = _fanSpeed.ToString();
                     Serial.WriteLine(_fanSpeed.ToString());
 
-                    lblRPM.Text = RpmDisp(_fanSpeed);
+                    pwmSpeedAmt.Text = _fanSpeed.ToString();
                 }
             }
             else
             {   //Automatic Fan Control Mode
 
                 double tempDifference = ((_tempId * 0.0043) * 100.0) - (double)tempControl.Value;
-
-                intDiff.Text = tempDifference.ToString();
 
                 if (tempDifference >= 5.0)  
                 {
@@ -337,7 +344,20 @@ namespace Ass04_TampusTicod
                     //triggers if temperature differential is between 0 and 5 degrees
 
                     double speedDouble = Math.Round((tempDifference / 5.0) * 255);
-                    _fanSpeed = (int)speedDouble;
+
+                    if ((speedDouble - ((minPWM.Value / 100.0) * 255.0)) > 0)
+                    {
+                        _fanSpeed = (int)Math.Round(((minPWM.Value / 100.0) * 255) + ((1.0 + (minPWM.Value / 100.0)) * Math.Abs(speedDouble - ((minPWM.Value / 100.0) * 255.0))));
+                    }
+                    else
+                    {
+                        _fanSpeed = (int)Math.Round(((minPWM.Value / 100.0) * 255) + ((1.0 + (minPWM.Value / 100.0)) * 1));
+                    }
+                    
+                    if (_fanSpeed > 255)
+                    {
+                        _fanSpeed = 255;
+                    }
                 }
                 else                        
                 {
@@ -346,12 +366,11 @@ namespace Ass04_TampusTicod
                     _fanSpeed = 0;
                 }
 
-                testSpeed.Text = _fanSpeed.ToString(); //to be removed
-
                 if (Serial.IsOpen)
                 {
-                    Serial.WriteLine(_fanSpeed.ToString());
-                    lblRPM.Text = RpmDisp(_fanSpeed);
+                        Serial.WriteLine(_fanSpeed.ToString());
+                        pwmSpeedAmt.Text = _fanSpeed.ToString();
+
                 }
             }
         }

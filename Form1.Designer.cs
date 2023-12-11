@@ -47,6 +47,7 @@
             this.radioBtn_Auto = new System.Windows.Forms.RadioButton();
             this.panelSpeedControlChooser = new System.Windows.Forms.Panel();
             this.gbxGraph = new System.Windows.Forms.GroupBox();
+            this.label9 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
@@ -54,8 +55,11 @@
             this.label3 = new System.Windows.Forms.Label();
             this.pbGraph = new System.Windows.Forms.PictureBox();
             this.gbxFanControl = new System.Windows.Forms.GroupBox();
+            this.lblMinPWM = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
+            this.minPWM = new System.Windows.Forms.TrackBar();
             this.gbxTemp = new System.Windows.Forms.GroupBox();
-            this.lblRPM = new System.Windows.Forms.Label();
+            this.pwmSpeedAmt = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.tempReading = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -64,10 +68,7 @@
             this.lblStatusText = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.cboxComport = new System.Windows.Forms.ComboBox();
-            this.testSpeed = new System.Windows.Forms.TextBox();
-            this.intDiff = new System.Windows.Forms.Label();
             this.drawTimer = new System.Windows.Forms.Timer(this.components);
-            this.label9 = new System.Windows.Forms.Label();
             this.gbxManual.SuspendLayout();
             this.gbxAuto.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tempControl)).BeginInit();
@@ -76,12 +77,14 @@
             this.gbxGraph.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbGraph)).BeginInit();
             this.gbxFanControl.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.minPWM)).BeginInit();
             this.gbxTemp.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // Serial
             // 
+            this.Serial.DtrEnable = true;
             this.Serial.WriteTimeout = 3000;
             this.Serial.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(this.Serial_DataReceived);
             // 
@@ -185,7 +188,7 @@
             0});
             this.tempControl.Name = "tempControl";
             this.tempControl.ReadOnly = true;
-            this.tempControl.Size = new System.Drawing.Size(37, 22);
+            this.tempControl.Size = new System.Drawing.Size(45, 22);
             this.tempControl.TabIndex = 4;
             this.tempControl.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.tempControl.Value = new decimal(new int[] {
@@ -253,7 +256,7 @@
             // 
             this.radioBtn_Manual.AutoSize = true;
             this.radioBtn_Manual.Checked = true;
-            this.radioBtn_Manual.Location = new System.Drawing.Point(20, 3);
+            this.radioBtn_Manual.Location = new System.Drawing.Point(5, 3);
             this.radioBtn_Manual.Name = "radioBtn_Manual";
             this.radioBtn_Manual.Size = new System.Drawing.Size(64, 17);
             this.radioBtn_Manual.TabIndex = 4;
@@ -265,7 +268,7 @@
             // radioBtn_Auto
             // 
             this.radioBtn_Auto.AutoSize = true;
-            this.radioBtn_Auto.Location = new System.Drawing.Point(125, 3);
+            this.radioBtn_Auto.Location = new System.Drawing.Point(75, 3);
             this.radioBtn_Auto.Name = "radioBtn_Auto";
             this.radioBtn_Auto.Size = new System.Drawing.Size(50, 17);
             this.radioBtn_Auto.TabIndex = 5;
@@ -279,7 +282,7 @@
             this.panelSpeedControlChooser.Controls.Add(this.radioBtn_Auto);
             this.panelSpeedControlChooser.Location = new System.Drawing.Point(6, 19);
             this.panelSpeedControlChooser.Name = "panelSpeedControlChooser";
-            this.panelSpeedControlChooser.Size = new System.Drawing.Size(288, 23);
+            this.panelSpeedControlChooser.Size = new System.Drawing.Size(136, 23);
             this.panelSpeedControlChooser.TabIndex = 6;
             // 
             // gbxGraph
@@ -300,6 +303,17 @@
             this.gbxGraph.TabIndex = 7;
             this.gbxGraph.TabStop = false;
             this.gbxGraph.Text = "Temperature Graph";
+            // 
+            // label9
+            // 
+            this.label9.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(8, 31);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(39, 13);
+            this.label9.TabIndex = 8;
+            this.label9.Text = "100 °C";
+            this.label9.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // label5
             // 
@@ -369,6 +383,9 @@
             // 
             // gbxFanControl
             // 
+            this.gbxFanControl.Controls.Add(this.lblMinPWM);
+            this.gbxFanControl.Controls.Add(this.label10);
+            this.gbxFanControl.Controls.Add(this.minPWM);
             this.gbxFanControl.Controls.Add(this.gbxTemp);
             this.gbxFanControl.Controls.Add(this.panelSpeedControlChooser);
             this.gbxFanControl.Controls.Add(this.gbxManual);
@@ -383,9 +400,48 @@
             this.gbxFanControl.TabStop = false;
             this.gbxFanControl.Text = "Fan Control";
             // 
+            // lblMinPWM
+            // 
+            this.lblMinPWM.AutoSize = true;
+            this.lblMinPWM.Enabled = false;
+            this.lblMinPWM.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblMinPWM.Location = new System.Drawing.Point(268, 24);
+            this.lblMinPWM.Name = "lblMinPWM";
+            this.lblMinPWM.Size = new System.Drawing.Size(19, 13);
+            this.lblMinPWM.TabIndex = 12;
+            this.lblMinPWM.Text = "50";
+            this.lblMinPWM.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Enabled = false;
+            this.label10.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label10.Location = new System.Drawing.Point(133, 24);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(69, 13);
+            this.label10.TabIndex = 10;
+            this.label10.Text = "Min PWM %";
+            // 
+            // minPWM
+            // 
+            this.minPWM.AutoSize = false;
+            this.minPWM.Enabled = false;
+            this.minPWM.LargeChange = 25;
+            this.minPWM.Location = new System.Drawing.Point(197, 21);
+            this.minPWM.Maximum = 100;
+            this.minPWM.Minimum = 25;
+            this.minPWM.Name = "minPWM";
+            this.minPWM.Size = new System.Drawing.Size(75, 20);
+            this.minPWM.SmallChange = 5;
+            this.minPWM.TabIndex = 11;
+            this.minPWM.TickStyle = System.Windows.Forms.TickStyle.None;
+            this.minPWM.Value = 50;
+            this.minPWM.ValueChanged += new System.EventHandler(this.minPWM_ValueChanged);
+            // 
             // gbxTemp
             // 
-            this.gbxTemp.Controls.Add(this.lblRPM);
+            this.gbxTemp.Controls.Add(this.pwmSpeedAmt);
             this.gbxTemp.Controls.Add(this.label6);
             this.gbxTemp.Controls.Add(this.tempReading);
             this.gbxTemp.Controls.Add(this.label2);
@@ -398,24 +454,24 @@
             this.gbxTemp.TabStop = false;
             this.gbxTemp.Text = "Diagnostics";
             // 
-            // lblRPM
+            // pwmSpeedAmt
             // 
-            this.lblRPM.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblRPM.Location = new System.Drawing.Point(104, 41);
-            this.lblRPM.Name = "lblRPM";
-            this.lblRPM.Size = new System.Drawing.Size(40, 13);
-            this.lblRPM.TabIndex = 9;
-            this.lblRPM.Text = "OFF";
-            this.lblRPM.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.pwmSpeedAmt.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.pwmSpeedAmt.Location = new System.Drawing.Point(104, 41);
+            this.pwmSpeedAmt.Name = "pwmSpeedAmt";
+            this.pwmSpeedAmt.Size = new System.Drawing.Size(40, 13);
+            this.pwmSpeedAmt.TabIndex = 9;
+            this.pwmSpeedAmt.Text = "OFF";
+            this.pwmSpeedAmt.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(22, 41);
+            this.label6.Location = new System.Drawing.Point(39, 41);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(81, 13);
+            this.label6.Size = new System.Drawing.Size(64, 13);
             this.label6.TabIndex = 8;
-            this.label6.Text = "RPM (approx.):";
+            this.label6.Text = "Fan Speed:";
             this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // tempReading
@@ -452,7 +508,7 @@
             this.lblStts.AutoSize = true;
             this.lblStts.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblStts.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
-            this.lblStts.Location = new System.Drawing.Point(149, 9);
+            this.lblStts.Location = new System.Drawing.Point(144, 9);
             this.lblStts.Name = "lblStts";
             this.lblStts.Size = new System.Drawing.Size(42, 13);
             this.lblStts.TabIndex = 1;
@@ -464,7 +520,7 @@
             this.lblStatusText.AutoSize = true;
             this.lblStatusText.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblStatusText.ForeColor = System.Drawing.Color.Firebrick;
-            this.lblStatusText.Location = new System.Drawing.Point(190, 9);
+            this.lblStatusText.Location = new System.Drawing.Point(185, 9);
             this.lblStatusText.Name = "lblStatusText";
             this.lblStatusText.Size = new System.Drawing.Size(77, 13);
             this.lblStatusText.TabIndex = 2;
@@ -494,38 +550,10 @@
             this.cboxComport.TabIndex = 0;
             this.cboxComport.Click += new System.EventHandler(this.cboxComport_Click);
             // 
-            // testSpeed
-            // 
-            this.testSpeed.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.testSpeed.Location = new System.Drawing.Point(12, 9);
-            this.testSpeed.Name = "testSpeed";
-            this.testSpeed.Size = new System.Drawing.Size(60, 20);
-            this.testSpeed.TabIndex = 9;
-            // 
-            // intDiff
-            // 
-            this.intDiff.Location = new System.Drawing.Point(86, 9);
-            this.intDiff.Name = "intDiff";
-            this.intDiff.Size = new System.Drawing.Size(43, 20);
-            this.intDiff.TabIndex = 15;
-            this.intDiff.Text = "99";
-            this.intDiff.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
             // drawTimer
             // 
             this.drawTimer.Interval = 200;
             this.drawTimer.Tick += new System.EventHandler(this.drawTimer_Tick);
-            // 
-            // label9
-            // 
-            this.label9.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(8, 31);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(39, 13);
-            this.label9.TabIndex = 8;
-            this.label9.Text = "100 °C";
-            this.label9.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // fanControl
             // 
@@ -534,11 +562,9 @@
             this.BackColor = System.Drawing.SystemColors.Control;
             this.ClientSize = new System.Drawing.Size(324, 456);
             this.Controls.Add(this.gbxFanControl);
-            this.Controls.Add(this.intDiff);
             this.Controls.Add(this.lblStts);
             this.Controls.Add(this.lblStatusText);
             this.Controls.Add(this.gbxConfig);
-            this.Controls.Add(this.testSpeed);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.gbxGraph);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -547,6 +573,7 @@
             this.Name = "fanControl";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Fan Control";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.fanControl_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.fanControl_FormClosed);
             this.gbxManual.ResumeLayout(false);
             this.gbxManual.PerformLayout();
@@ -560,6 +587,8 @@
             this.gbxGraph.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbGraph)).EndInit();
             this.gbxFanControl.ResumeLayout(false);
+            this.gbxFanControl.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.minPWM)).EndInit();
             this.gbxTemp.ResumeLayout(false);
             this.gbxTemp.PerformLayout();
             this.groupBox1.ResumeLayout(false);
@@ -596,18 +625,19 @@
         private System.Windows.Forms.Label tempReading;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.ComboBox cboxComport;
-        private System.Windows.Forms.TextBox testSpeed;
-        private System.Windows.Forms.Label lblRPM;
+        private System.Windows.Forms.Label pwmSpeedAmt;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.PictureBox pbGraph;
-        private System.Windows.Forms.Label intDiff;
         private System.Windows.Forms.NumericUpDown tempControl;
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.Timer drawTimer;
         private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.TrackBar minPWM;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label lblMinPWM;
     }
 }
 
