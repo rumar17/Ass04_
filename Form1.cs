@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
-namespace Ass04_TampusTicod
+namespace Ass04_Macapobre
 {
     public partial class fanControl : Form
     {
@@ -56,7 +56,7 @@ namespace Ass04_TampusTicod
                 btnSerialConnect.Text = "Connect";
                 lblStatusText.Text = "Disconnected";
                 lblStatusText.ForeColor = Color.Firebrick;
-                gbxFanControl.Enabled = false; //disables fan control
+                gbxFanControl.Enabled = false;
                 radioBtn_speedOff.Checked = true;
                 cboxComport.Enabled = true;
                 cboxBaudrate.Enabled = true;
@@ -75,7 +75,6 @@ namespace Ass04_TampusTicod
                 return;
             }
 
-            //Getting user Baud Rate from comboBox
             try
             {
                 Serial.BaudRate = int.Parse(cboxBaudrate.Text);
@@ -86,11 +85,10 @@ namespace Ass04_TampusTicod
                 return;
             }
 
-            //Checking if COM Port is used by another application
             if (false == Serial.IsOpen)
             {
                 try
-                {   //COM Port available
+                {   
                     
                     Serial.Open();
                 }
@@ -109,14 +107,13 @@ namespace Ass04_TampusTicod
                     btnSerialConnect.Text = "Disconnect";
                     lblStatusText.Text = "Connected, via " + cboxComport.Text;
                     lblStatusText.ForeColor = Color.MediumSeaGreen;
-                    gbxFanControl.Enabled = true; //enables fan control
+                    gbxFanControl.Enabled = true;
                     cboxComport.Enabled = false;
                     cboxBaudrate.Enabled = false;
                 }
             }
         }
 
-        //Checks Manual fan mode state
         private void radioBtn_Manual_CheckedChanged(object sender, EventArgs e)
         {
             if (radioBtn_Manual.Checked)
@@ -137,7 +134,6 @@ namespace Ass04_TampusTicod
             }
         }
 
-        //Checks Automatic fan mode state
         private void radioBtn_Auto_CheckedChanged(object sender, EventArgs e)
         {
             if (radioBtn_Auto.Checked)
@@ -158,7 +154,6 @@ namespace Ass04_TampusTicod
             }
         }
 
-        //Receives data from serial device
         private void Serial_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
         {
             if (Serial.IsOpen)
@@ -197,31 +192,26 @@ namespace Ass04_TampusTicod
             }
         }
 
-        //Triggers specified events once time specified is elapsed
         private void drawTimer_Tick(object sender, EventArgs e)
         {
             pbGraph.Refresh();
         }
 
-        //Closes serial connections once form is closed
         private void fanControl_FormClosed(object sender, FormClosedEventArgs e)
         {
 
         }
 
-        //Triggers when the value of the numericUpDown changes
         private void tempControl_ValueChanged(object sender, EventArgs e)
         {
             FanControl(_isManual);
         }
 
-        //Passes the minimum PWM value of the fan once the slider value is changed
         private void minPWM_ValueChanged(object sender, EventArgs e)
         {
             lblMinPWM.Text = minPWM.Value.ToString();
         }
 
-        //Closes serial once form is closed
         private void fanControl_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (true == Serial.IsOpen)
@@ -231,9 +221,6 @@ namespace Ass04_TampusTicod
             }
         }
 
-        //Functions necessary for the speed changing
-
-        //Draws the graph
         private void pbGraph_Paint(object sender, PaintEventArgs e)
         {
             Bitmap graphBm = new Bitmap(240, 125);
@@ -267,13 +254,11 @@ namespace Ass04_TampusTicod
             }
         }
 
-        //Converts temperature from binary to its equivalent integer value
         private string Convert_toTemp(int temp_inBin)
         {
             return Math.Round(((temp_inBin * 0.0043) * 100.0)).ToString();
         }
 
-        //Initializes Y axis of temperature points in the graph
         private void InitializePoints()
         {
             int pointsCount = 10;
@@ -281,7 +266,6 @@ namespace Ass04_TampusTicod
             _tempPoints = new Int32[pointsCount];
         }
 
-        //Translates the binary value of the temperature into the Y axis of the temperature points in the graph
         private void transLateToY(int pointId)
         {
             Double tempYCoord = Math.Round((pointId / 110.0) * 120);
@@ -294,11 +278,10 @@ namespace Ass04_TampusTicod
             _tempPoints[0] = (int)tempYCoord;
         }
 
-        //Adjusts fan speed
         private void FanControl(bool fanControlMode)
         {
             if (_isManual)
-            {   //Manual Fan Control Mode
+            {   
 
                 if (radioBtn_speedOff.Checked)
                 {
@@ -329,7 +312,7 @@ namespace Ass04_TampusTicod
                 }
             }
             else
-            {   //Automatic Fan Control Mode
+            {  
 
                 double tempDifference = ((_tempId * 0.0043) * 100.0) - (double)tempControl.Value;
 

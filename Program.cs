@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Ass04_TampusTicod
+namespace Ass04_Macapobre
 {
     internal static class Program
     {

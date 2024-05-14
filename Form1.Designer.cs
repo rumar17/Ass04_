@@ -1,4 +1,4 @@
-﻿namespace Ass04_TampusTicod
+﻿namespace Ass04_Macapobre
 {
     partial class fanControl
     {
